@@ -4,7 +4,9 @@ import Fuse
 struct App {
     static func main() {
         let app = div {
-            text("Hello, world!")
+            text("Hello")
+            text(",")
+            text(" world!")
         }
         launch(app: app)
     }

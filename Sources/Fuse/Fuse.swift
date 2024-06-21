@@ -12,6 +12,21 @@ public func launch<C>(app: C) where C: Component {
     #endif
 }
 
+@resultBuilder
+public struct ComponentBuilder {
+    public static func buildBlock<C: Component>(_ c: C) -> C {
+        c
+    }
+
+    public static func buildPartialBlock<C: Component>(first: C) -> C {
+        first
+    }
+
+    public static func buildPartialBlock<C1: Component, C2: Component>(accumulated: C1, next: C2) -> tuple<C1, C2> {
+        tuple(accumulated, next)
+    }
+}
+
 public protocol Component {
     associatedtype Body: Component
     var body: Body { get }
@@ -20,6 +35,35 @@ public protocol Component {
         func render() -> JSValue
     #else
         func render() -> String
+    #endif
+}
+
+public struct tuple<C1, C2>: Component where C1: Component, C2: Component {
+    let first: C1
+    let second: C2
+
+    public var body: some Component {
+        // TODO: Is this okay?
+        tuple(first, second)
+    }
+
+    public init(_ first: C1, _ second: C2) {
+        self.first = first
+        self.second = second
+    }
+
+    #if arch(wasm32)
+        public func render() -> JSValue {
+            let document = JSObject.global.document
+            let fragment = document.createDocumentFragment()
+            fragment.append(first.render())
+            fragment.append(second.render())
+            return fragment
+        }
+    #else
+        public func render() -> String {
+            first.render() + second.render()
+        }
     #endif
 }
 
@@ -52,7 +96,7 @@ public struct div<C: Component>: Component {
         content
     }
 
-    public init(content: () -> C) {
+    public init(@ComponentBuilder content: () -> C) {
         self.content = content()
     }
 
