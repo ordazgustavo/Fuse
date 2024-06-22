@@ -38,6 +38,14 @@ public protocol Component {
     #endif
 }
 
+public extension Component {
+    #if arch(wasm32)
+        func render() -> JSValue { body.render() }
+    #else
+        func render() -> String { body.render() }
+    #endif
+}
+
 public struct tuple<C1, C2>: Component where C1: Component, C2: Component {
     let first: C1
     let second: C2
@@ -67,11 +75,27 @@ public struct tuple<C1, C2>: Component where C1: Component, C2: Component {
     #endif
 }
 
+extension String: Component {
+    public var body: some Component {
+        self
+    }
+
+    #if arch(wasm32)
+        public func render() -> JSValue {
+            jsValue
+        }
+    #else
+        public func render() -> String {
+            self
+        }
+    #endif
+}
+
 public struct text: Component {
     let content: String
 
     public var body: some Component {
-        text("")
+        content
     }
 
     public init(_ content: String) {
@@ -80,11 +104,11 @@ public struct text: Component {
 
     #if arch(wasm32)
         public func render() -> JSValue {
-            content.jsValue
+            body.render()
         }
     #else
         public func render() -> String {
-            content
+            body.render()
         }
     #endif
 }
@@ -103,13 +127,17 @@ public struct div<C: Component>: Component {
     #if arch(wasm32)
         public func render() -> JSValue {
             let document = JSObject.global.document
-            let element = document.createElement("div")
-            element.append(body.render())
-            return element
+            let ssrElement = document.querySelector("[data-hk=\"0\"]")
+            guard ssrElement != .undefined else { fatalError("could not find data-hk=0") }
+            print("Hydrating:", ssrElement)
+            /// let element = document.createElement("div")
+            /// element.append(body.render())
+            /// ssrElement.replaceWith(element)
+            return ssrElement
         }
     #else
         public func render() -> String {
-            "<div>\(body.render())</div>"
+            "<div data-hk=\"0\">\(body.render())</div>"
         }
     #endif
 }

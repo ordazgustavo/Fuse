@@ -4,14 +4,19 @@ import PackageDescription
 
 let package = Package(
     name: "Fuse",
+    platforms: [.macOS(.v14)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(name: "Fuse", targets: ["Fuse"]),
-        .executable(name: "FuseApp", targets: ["FuseApp"]),
+        .executable(name: "Server", targets: ["Server"]),
+        .executable(name: "Client", targets: ["Client"]),
+        .library(name: "App", targets: ["App"]),
     ],
     dependencies: [
         .package(url: "https://github.com/swiftwasm/carton", from: "1.1.1"),
         .package(url: "https://github.com/swiftwasm/JavaScriptKit.git", from: "0.19.3"),
+        .package(url: "https://github.com/hummingbird-project/hummingbird.git", revision: "2.0.0-beta.8"),
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.3.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -21,12 +26,28 @@ let package = Package(
             dependencies: [
                 .product(
                     name: "JavaScriptKit",
-                    package: "JavaScriptKit"
-                    // condition: .when(platforms: [.wasi])
+                    package: "JavaScriptKit",
+                    condition: .when(platforms: [.wasi])
                 ),
             ]
         ),
-        .executableTarget(name: "FuseApp", dependencies: ["Fuse"]),
+        .target(
+            name: "App",
+            dependencies: ["Fuse"]
+        ),
+        .executableTarget(
+            name: "Server",
+            dependencies: [
+                "Fuse",
+                "App",
+                .product(name: "Hummingbird", package: "hummingbird"),
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            ]
+        ),
+        .executableTarget(
+            name: "Client",
+            dependencies: ["Fuse", "App"]
+        ),
         .testTarget(name: "FuseTests", dependencies: ["Fuse"]),
     ]
 )
