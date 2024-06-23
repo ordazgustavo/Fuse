@@ -1,0 +1,3 @@
+--ifdef noindent
+--swiftversion 5.10
+--maxwidth 120

@@ -6,11 +6,19 @@ Swift ssr wasm framework
 
 1. Client
 
+Build for development
+
 ```sh
-swift run carton bundle --Client
+swift run carton bundle --debug-info --wasm-optimizations none --output public --product Client
 ```
 
-1. Server
+Build for production
+
+```sh
+swift run carton bundle --output public --product Client
+```
+
+2. Server
 
 ```sh
 swift build Server

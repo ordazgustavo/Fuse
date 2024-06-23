@@ -1,21 +1,21 @@
 #if arch(wasm32)
-    import JavaScriptKit
+import JavaScriptKit
 #endif
 
-public func launch<C>(app: C) where C: Component {
+public func launch(app: some Component) {
     #if arch(wasm32)
-        let document = JSObject.global.document
-        let element = app.render()
-        document.body.append(element)
+    let document = JSObject.global.document
+    let element = app.render()
+    document.body.append(element)
     #else
-        print(app.render())
+    print(app.render())
     #endif
 }
 
 @resultBuilder
 public struct ComponentBuilder {
-    public static func buildBlock<C: Component>(_ c: C) -> C {
-        c
+    public static func buildBlock<C: Component>(_ component: C) -> C {
+        component
     }
 
     public static func buildPartialBlock<C: Component>(first: C) -> C {
@@ -32,17 +32,17 @@ public protocol Component {
     var body: Body { get }
 
     #if arch(wasm32)
-        func render() -> JSValue
+    func render() -> JSValue
     #else
-        func render() -> String
+    func render() -> String
     #endif
 }
 
 public extension Component {
     #if arch(wasm32)
-        func render() -> JSValue { body.render() }
+    func render() -> JSValue { body.render() }
     #else
-        func render() -> String { body.render() }
+    func render() -> String { body.render() }
     #endif
 }
 
@@ -61,17 +61,17 @@ public struct tuple<C1, C2>: Component where C1: Component, C2: Component {
     }
 
     #if arch(wasm32)
-        public func render() -> JSValue {
-            let document = JSObject.global.document
-            let fragment = document.createDocumentFragment()
-            fragment.append(first.render())
-            fragment.append(second.render())
-            return fragment
-        }
+    public func render() -> JSValue {
+        let document = JSObject.global.document
+        let fragment = document.createDocumentFragment()
+        fragment.append(first.render())
+        fragment.append(second.render())
+        return fragment
+    }
     #else
-        public func render() -> String {
-            first.render() + second.render()
-        }
+    public func render() -> String {
+        first.render() + second.render()
+    }
     #endif
 }
 
@@ -81,13 +81,13 @@ extension String: Component {
     }
 
     #if arch(wasm32)
-        public func render() -> JSValue {
-            jsValue
-        }
+    public func render() -> JSValue {
+        jsValue
+    }
     #else
-        public func render() -> String {
-            self
-        }
+    public func render() -> String {
+        self
+    }
     #endif
 }
 
@@ -103,13 +103,13 @@ public struct text: Component {
     }
 
     #if arch(wasm32)
-        public func render() -> JSValue {
-            body.render()
-        }
+    public func render() -> JSValue {
+        body.render()
+    }
     #else
-        public func render() -> String {
-            body.render()
-        }
+    public func render() -> String {
+        body.render()
+    }
     #endif
 }
 
@@ -125,19 +125,19 @@ public struct div<C: Component>: Component {
     }
 
     #if arch(wasm32)
-        public func render() -> JSValue {
-            let document = JSObject.global.document
-            let ssrElement = document.querySelector("[data-hk=\"0\"]")
-            guard ssrElement != .undefined else { fatalError("could not find data-hk=0") }
-            print("Hydrating:", ssrElement)
-            /// let element = document.createElement("div")
-            /// element.append(body.render())
-            /// ssrElement.replaceWith(element)
-            return ssrElement
-        }
+    public func render() -> JSValue {
+        let document = JSObject.global.document
+        let ssrElement = document.querySelector("[data-hk=\"0\"]")
+        guard ssrElement != .undefined else { fatalError("could not find data-hk=0") }
+        print("Hydrating:", ssrElement)
+        /// let element = document.createElement("div")
+        /// element.append(body.render())
+        /// ssrElement.replaceWith(element)
+        return ssrElement
+    }
     #else
-        public func render() -> String {
-            "<div data-hk=\"0\">\(body.render())</div>"
-        }
+    public func render() -> String {
+        "<div data-hk=\"0\">\(body.render())</div>"
+    }
     #endif
 }
