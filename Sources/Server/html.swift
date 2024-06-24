@@ -12,8 +12,8 @@ struct HTML<C: Component>: ResponseGenerator {
         var template = String(decoding: fileData, as: UTF8.self)
         if let range = template.range(of: "<body>") {
             let sub = template[range]
-            let contents = render(component: cmp)
-            template.insert(contentsOf: render(component: contents), at: sub.endIndex)
+            let contents = renderToString(component: cmp)
+            template.insert(contentsOf: contents, at: sub.endIndex)
         }
         let buffer = context.allocator.buffer(string: template)
         return .init(

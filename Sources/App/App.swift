@@ -1,7 +1,7 @@
 import Fuse
 
 struct Title: Component {
-    var body: some Component {
+    var body: some Node {
         div {
             "Hello"
         }
@@ -9,7 +9,7 @@ struct Title: Component {
 }
 
 public struct App: Component {
-    public var body: some Component {
+    public var body: some Node {
         div {
             Title()
             div {
