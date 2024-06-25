@@ -3,7 +3,7 @@ import Fuse
 struct Title: Component {
     var body: some Node {
         div {
-            "Hello"
+            h1("Hello, World!")
         }
     }
 }
@@ -13,7 +13,8 @@ public struct App: Component {
         div {
             Title()
             div {
-                "World"
+                p("Page description")
+                "Just a text"
             }
         }
     }
