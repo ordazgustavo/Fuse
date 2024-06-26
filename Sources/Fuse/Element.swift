@@ -20,16 +20,21 @@ public struct Element<T>: Node {
     }
 
     public func render(_ ctx: HydrationContext) {
-        let attr = renderAttr()
         let idx = ctx.index
-        ctx.index += 1
-        ctx.buffer.append(contentsOf: "<\(tag) data-hk=\"\(idx)\" \(attr)")
+
+        ctx.buffer.append("<\(tag) data-hk=\"\(idx)\"")
+
+        for (key, value) in attr {
+            ctx.buffer.append(" \(key)=\"\(value)\"")
+        }
+
         if let child {
             ctx.buffer.append(">")
+            ctx.index += 1
             child.render(ctx)
-            ctx.buffer.append(contentsOf: "</\(tag)>")
+            ctx.buffer.append("</\(tag)>")
         } else {
-            ctx.buffer.append(contentsOf: "/>")
+            ctx.buffer.append("/>")
         }
     }
 
@@ -47,22 +52,19 @@ public struct Element<T>: Node {
     }
 
     public func hydrate(_ ctx: HydrationContext) {
-        print("Hydrating \(tag) with data-hk=\(ctx.index)")
-        let ssrElement = ctx.document.querySelector("[data-hk=\"\(ctx.index)\"]")
-        guard ssrElement != .undefined else { fatalError("Could not find data-hk=\(ctx.index)") }
-        print("Hydrated \(tag) with data-hk=\(ctx.index)")
+        let selector = "data-hk=\"\(ctx.index)\""
+
+        print("Hydrating \(tag) with \(selector)")
+
+        let ssrElement = ctx.document.querySelector("[\(selector)]")
+        guard ssrElement != .undefined else { fatalError("Could not find \(selector)") }
+
+        print("Hydrated \(tag) with \(selector)")
+
         ctx.index += 1
         child?.hydrate(ctx)
     }
     #endif
-
-    func renderAttr() -> String {
-        attr.reduce(into: "", attrParser)
-    }
-
-    func attrParser(_ acc: inout String, _ item: (key: String, value: String)) {
-        acc.append(" \(item.key)=\"\(item.value)\"")
-    }
 }
 
 extension Element where T == Tag.div {
