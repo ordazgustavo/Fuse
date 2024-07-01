@@ -2,6 +2,8 @@
 
 import PackageDescription
 
+let swiftSettings: [SwiftSetting] = [.enableExperimentalFeature("StrictConcurrency=complete")]
+
 let package = Package(
     name: "Fuse",
     platforms: [.macOS(.v14)],
@@ -29,11 +31,13 @@ let package = Package(
                     package: "JavaScriptKit",
                     condition: .when(platforms: [.wasi])
                 ),
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "App",
-            dependencies: ["Fuse"]
+            dependencies: ["Fuse"],
+            swiftSettings: swiftSettings
         ),
         .executableTarget(
             name: "Server",
@@ -42,11 +46,13 @@ let package = Package(
                 "App",
                 .product(name: "Hummingbird", package: "hummingbird"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .executableTarget(
             name: "Client",
-            dependencies: ["Fuse", "App"]
+            dependencies: ["Fuse", "App"],
+            swiftSettings: swiftSettings
         ),
         .testTarget(name: "FuseTests", dependencies: ["Fuse"]),
     ]

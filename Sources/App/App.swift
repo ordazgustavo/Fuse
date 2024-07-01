@@ -1,23 +1,68 @@
+import Foundation
 import Fuse
 
-struct Title: Component {
-    var body: some Node {
-        div {
-            h1("Hello, World!")
-        }
+let adjectives = [
+    "pretty",
+    "large",
+    "big",
+    "small",
+    "tall",
+    "short",
+    "long",
+    "handsome",
+    "plain",
+    "quaint",
+    "clean",
+    "elegant",
+    "easy",
+    "angry",
+    "crazy",
+    "helpful",
+    "mushy",
+    "odd",
+    "unsightly",
+    "adorable",
+    "important",
+    "inexpensive",
+    "cheap",
+    "expensive",
+    "fancy",
+]
+
+struct RowData: Identifiable {
+    let id = UUID()
+    let label: String
+}
+
+func buildData(_ count: Int) -> [RowData] {
+    var data = [RowData]()
+    for _ in 0 ..< count {
+        data.append(.init(label: adjectives.randomElement()!))
     }
+    return data
 }
 
 public struct App: Component {
+    let rows: Int
+
+    var data: [RowData] {
+        buildData(rows)
+    }
+
     public var body: some Node {
-        div {
-            Title()
-            div {
-                p("Page description")
-                "Just a text"
+        table {
+            tbody {
+                ForEach(data) { row in
+                    tr {
+                        td { "\(row.id)" }
+                        td { row.label }
+                    }
+                }
             }
         }
     }
 
-    public init() {}
+    public init(rows: Int = 1000) {
+        self.rows = rows
+    }
 }

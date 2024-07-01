@@ -16,7 +16,7 @@ func buildApplication(_ arguments: some ServerArguments) async throws -> some Ap
     }
 
     router.get("/") { _, _ -> HTML in
-        HTML(cmp: App())
+        HTML(cmp: Document(src: "index.js"))
     }
 
     // create application using router

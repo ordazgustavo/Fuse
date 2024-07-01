@@ -8,7 +8,7 @@ public protocol Component: Node {
 }
 
 public extension Component {
-    func render(_ ctx: HydrationContext) {
+    func render(_ ctx: ServerHydrationContext) {
         body.render(ctx)
     }
 
@@ -17,7 +17,7 @@ public extension Component {
         body.render(ctx)
     }
 
-    func hydrate(_ ctx: HydrationContext) {
+    func hydrate(_ ctx: ClientHydrationContext) {
         body.hydrate(ctx)
     }
     #endif
