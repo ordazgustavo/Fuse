@@ -1,5 +1,5 @@
 {
-  "originHash" : "bbc9ce506273f3e1b2fd0efb88d0040cb6d930c9f1ba6f7ae11d934d2699f5e2",
+  "originHash" : "c0b2309cf30ca7945e572d3035aea5b34143514832be909f5e30d35db88f471b",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -15,8 +15,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftwasm/carton",
       "state" : {
-        "revision" : "dca59f36ad33781418399829c53706ce591fef93",
-        "version" : "1.1.1"
+        "revision" : "d3f1da61faa05283e46a05698ac9bea46fd1035f",
+        "version" : "1.1.2"
+      }
+    },
+    {
+      "identity" : "compress-nio",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/adam-fowler/compress-nio.git",
+      "state" : {
+        "revision" : "a52d3ac5f48820846d34d78d6f59316481e84968",
+        "version" : "1.2.1"
       }
     },
     {
@@ -24,8 +33,17 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/hummingbird-project/hummingbird.git",
       "state" : {
-        "branch" : "2.0.0-beta.8",
-        "revision" : "de24af2daf32e8ef9439823e7c72b3ee8676ef6c"
+        "branch" : "main",
+        "revision" : "89671f134e14976b76ca5b7c671b285b9a3cdfad"
+      }
+    },
+    {
+      "identity" : "hummingbird-compression",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/hummingbird-project/hummingbird-compression.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "69346cbf036f919bdf045ec226eb8f8b750e85b4"
       }
     },
     {

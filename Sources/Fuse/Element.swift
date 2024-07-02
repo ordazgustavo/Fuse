@@ -1,6 +1,4 @@
-#if arch(wasm32)
 import JavaScriptKit
-#endif
 
 public enum Tag {
     protocol Href {}
@@ -114,25 +112,34 @@ public enum Tag {
     public enum wbr {}
 }
 
+public typealias EventHandler = (_ event: JSValue) -> Void
+
 public struct Element<T>: Node {
     let tag: StaticString
     var attr: [String: String]
+    var events: [String: EventHandler]
     let child: Node?
     let isVoid: Bool
 
-    init(tag: StaticString, attr: [String: String] = [:], child: Node? = nil, isVoid: Bool = false) {
+    init(
+        tag: StaticString,
+        attr: [String: String] = [:],
+        events: [String: EventHandler] = [:],
+        child: Node? = nil,
+        isVoid: Bool = false
+    ) {
         self.tag = tag
         self.attr = attr
+        self.events = events
         self.child = child
         self.isVoid = isVoid
     }
 
-    public func render(_ ctx: ServerHydrationContext) {
+    public func render(_ ctx: HydrationContext) {
         ctx.buffer.append("<\(tag)")
 
-        if isHydratable() {
-            ctx.buffer.append(" data-hk=\"\(ctx.index)\"")
-            ctx.index += 1
+        if ctx.hydrate {
+            ctx.buffer.append(" data-hk=\"\(ctx.getID())\"")
         }
 
         for (key, value) in attr {
@@ -151,46 +158,47 @@ public struct Element<T>: Node {
         }
     }
 
-    #if arch(wasm32)
     public func render(_ ctx: RenderContext) -> JSValue {
         let element = ctx.document.createElement(tag)
         for (key, value) in attr {
-            element.setAttribute(key, value)
+            _ = element.setAttribute(key, value)
+        }
+        for (event, handler) in events {
+            _ = element.addEventListener(event, JSClosure { args in
+                handler(args[0])
+                return .undefined
+            })
         }
         if let child {
             let children = child.render(ctx)
-            element.append(children)
+            _ = element.append(children)
         }
         return element
     }
 
-    public func hydrate(_ ctx: ClientHydrationContext) {
-        if !isHydratable() {
-            child?.hydrate(ctx)
-            return
-        }
-        let selector = "data-hk=\"\(ctx.index)\""
+    public func hydrate(_ ctx: HydrationContext) {
+        print("hydrating \(tag) \(ctx.hydrate)")
+        defer { child?.hydrate(ctx) }
+        guard ctx.hydrate else { return }
+
+        let selector = "data-hk=\"\(ctx.getID())\""
 
         print("Hydrating \(tag) with \(selector)")
-
         let ssrElement = ctx.document.querySelector("[\(selector)]")
         guard ssrElement != .undefined else { fatalError("Could not find \(selector)") }
-
+        for (event, handler) in events {
+            _ = ssrElement.addEventListener(event, JSClosure { args in
+                handler(args[0])
+                return .undefined
+            })
+        }
         print("Hydrated \(tag) with \(selector)")
-
-        ctx.index += 1
-        child?.hydrate(ctx)
-    }
-    #endif
-
-    func isHydratable() -> Bool {
-        attr.contains(where: { $0.key.starts(with: "on") })
     }
 }
 
 // MARK: - Global attributes
 
-extension Element {
+public extension Element {
     func accesskey(_ value: String) -> Self {
         var new = self
         new.attr["accesskey"] = value
@@ -415,22 +423,29 @@ extension Element {
         new.attr["translate"] = value.rawValue
         return new
     }
+
+    enum EventTypes: String {
+        case click, dblclick, input, mousedown, mouseup, mouseover, mousemove, mouseout, keydown, keyup, keypress,
+             focus,
+             blur,
+             change, select
+    }
+
+    func on(_ event: EventTypes, handler: @escaping EventHandler) -> Self {
+        var new = self
+        new.events[event.rawValue] = handler
+        return new
+    }
 }
 
-extension Element where T == Tag.button {
-    public enum ButtonType: String {
+public extension Element where T == Tag.button {
+    enum ButtonType: String {
         case button, submit, reset
     }
 
     func type(_ value: ButtonType) -> Self {
         var new = self
         new.attr["type"] = value.rawValue
-        return new
-    }
-
-    func onClick(_ value: String) -> Self {
-        var new = self
-        new.attr["onclick"] = value
         return new
     }
 }

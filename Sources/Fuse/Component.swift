@@ -1,6 +1,4 @@
-#if arch(wasm32)
 import JavaScriptKit
-#endif
 
 public protocol Component: Node {
     associatedtype Body: Node
@@ -8,19 +6,20 @@ public protocol Component: Node {
 }
 
 public extension Component {
-    func render(_ ctx: ServerHydrationContext) {
+    func render(_ ctx: HydrationContext) {
+        ctx.hydrate = true
         body.render(ctx)
     }
 
-    #if arch(wasm32)
     func render(_ ctx: RenderContext) -> JSValue {
         body.render(ctx)
     }
 
-    func hydrate(_ ctx: ClientHydrationContext) {
+    func hydrate(_ ctx: HydrationContext) {
+        print("hydrating \(Self.self)")
+        ctx.hydrate = true
         body.hydrate(ctx)
     }
-    #endif
 }
 
 @resultBuilder

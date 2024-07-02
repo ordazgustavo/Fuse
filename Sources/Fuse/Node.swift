@@ -1,13 +1,9 @@
-#if arch(wasm32)
 import JavaScriptKit
-#endif
 
 public protocol Node {
-    func render(_ ctx: ServerHydrationContext)
-    #if arch(wasm32)
+    func render(_ ctx: HydrationContext)
     func render(_ ctx: RenderContext) -> JSValue
-    func hydrate(_ ctx: ClientHydrationContext)
-    #endif
+    func hydrate(_ ctx: HydrationContext)
 }
 
 // MARK: - a
@@ -85,6 +81,18 @@ public extension Node {
     }
 }
 
+// MARK: - form
+
+public extension Node {
+    func form(@ComponentBuilder content: () -> some Node) -> Element<Tag.form> {
+        Element(tag: "form", child: content())
+    }
+
+    func form(method: String, @ComponentBuilder content: () -> some Node) -> Element<Tag.form> {
+        Element(tag: "form", attr: ["method": method], child: content())
+    }
+}
+
 // MARK: - h
 
 public extension Node {
@@ -118,6 +126,26 @@ public extension Node {
 
     func html(lang: String, @ComponentBuilder content: () -> some Node) -> Element<Tag.html> {
         Element(tag: "html", attr: ["lang": lang], child: content())
+    }
+}
+
+// MARK: - input
+
+public extension Node {
+    func input(type: String) -> Element<Tag.input> {
+        Element(tag: "input", attr: ["type": type])
+    }
+
+    // func input(type: String) -> Element<Tag.input> {
+    //    Element(tag: "input", attr: ["type": type])
+    // }
+
+    func input(type: String, value: Binding<String>) -> Element<Tag.input> {
+        Element(
+            tag: "input",
+            attr: ["type": type, "value": value.wrappedValue],
+            events: ["input": { value.wrappedValue = $0.target.value.string ?? "" }]
+        )
     }
 }
 

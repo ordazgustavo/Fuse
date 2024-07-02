@@ -15,9 +15,10 @@ let package = Package(
         .library(name: "App", targets: ["App"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swiftwasm/carton", from: "1.1.1"),
+        .package(url: "https://github.com/swiftwasm/carton", from: "1.1.2"),
         .package(url: "https://github.com/swiftwasm/JavaScriptKit.git", from: "0.19.3"),
-        .package(url: "https://github.com/hummingbird-project/hummingbird.git", revision: "2.0.0-beta.8"),
+        .package(url: "https://github.com/hummingbird-project/hummingbird.git", branch: "main"),
+        .package(url: "https://github.com/hummingbird-project/hummingbird-compression.git", branch: "main"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.3.0"),
     ],
     targets: [
@@ -28,8 +29,8 @@ let package = Package(
             dependencies: [
                 .product(
                     name: "JavaScriptKit",
-                    package: "JavaScriptKit",
-                    condition: .when(platforms: [.wasi])
+                    package: "JavaScriptKit"
+                    // condition: .when(platforms: [.wasi])
                 ),
             ],
             swiftSettings: swiftSettings
@@ -45,6 +46,7 @@ let package = Package(
                 "Fuse",
                 "App",
                 .product(name: "Hummingbird", package: "hummingbird"),
+                .product(name: "HummingbirdCompression", package: "hummingbird-compression"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ],
             swiftSettings: swiftSettings

@@ -1,68 +1,56 @@
-import Foundation
 import Fuse
 
-let adjectives = [
-    "pretty",
-    "large",
-    "big",
-    "small",
-    "tall",
-    "short",
-    "long",
-    "handsome",
-    "plain",
-    "quaint",
-    "clean",
-    "elegant",
-    "easy",
-    "angry",
-    "crazy",
-    "helpful",
-    "mushy",
-    "odd",
-    "unsightly",
-    "adorable",
-    "important",
-    "inexpensive",
-    "cheap",
-    "expensive",
-    "fancy",
-]
+struct MyBytton: Component {
+    @Binding var count: Int
 
-struct RowData: Identifiable {
-    let id = UUID()
-    let label: String
-}
-
-func buildData(_ count: Int) -> [RowData] {
-    var data = [RowData]()
-    for _ in 0 ..< count {
-        data.append(.init(label: adjectives.randomElement()!))
+    var body: some Node {
+        div {
+            button { "+" }
+                .on(.click) { _ in
+                    count += 1
+                }
+            button { "-" }
+                .on(.click) { _ in
+                    count -= 1
+                }
+        }
     }
-    return data
 }
 
 public struct App: Component {
-    let rows: Int
-
-    var data: [RowData] {
-        buildData(rows)
-    }
+    @Signal private var count = 0
+    @Signal private var name = "Gustavo"
+    @Signal private var surename = ""
 
     public var body: some Node {
-        table {
-            tbody {
-                ForEach(data) { row in
-                    tr {
-                        td { "\(row.id)" }
-                        td { row.label }
-                    }
-                }
+        div {
+            "The count is: "
+            _count
+            MyBytton(count: $count)
+
+            div {
+                "The name is: "
+                _name
             }
+            input(type: "text", value: $name)
+
+            div {
+                "The surename is: "
+                _surename
+            }
+            input(type: "text")
+                .on(.input) { event in
+                    surename = event.target.value.string ?? ""
+                }
         }
     }
 
-    public init(rows: Int = 1000) {
-        self.rows = rows
+    public init() {
+        _count.observe { count in
+            print("Count is \(count)")
+        }
+        _name.observe { name in
+            print("Name is \(name)")
+        }
     }
 }

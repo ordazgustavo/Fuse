@@ -1,5 +1,6 @@
 import App
 import Hummingbird
+import HummingbirdCompression
 
 public protocol ServerArguments {
     var hostname: String { get }
@@ -9,6 +10,8 @@ public protocol ServerArguments {
 func buildApplication(_ arguments: some ServerArguments) async throws -> some ApplicationProtocol {
     let router = Router()
 
+    router.middlewares.add(LogRequestsMiddleware(.info))
+    router.middlewares.add(ResponseCompressionMiddleware(minimumResponseSizeToCompress: 512))
     router.middlewares.add(FileMiddleware(searchForIndexHtml: false))
 
     router.get("/health") { _, _ in

@@ -4,6 +4,7 @@ import Fuse
 @main
 public struct Client {
     public static func main() {
-        hydrate(component: App())
+        render(component: App())
+        // hydrate(component: Document(src: "/index.js"))
     }
 }
